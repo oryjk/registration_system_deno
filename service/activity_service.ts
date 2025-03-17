@@ -83,15 +83,20 @@ export class ActivityService {
         );
     }
 
-    async updateActivityStatus(id: string, status: number) {
+    async updateActivityStatusAndDesc(id: string, status: number, desc: string) {
         const client = await db.client;
         try {
+            await client.execute("START TRANSACTION");
+
             await client.execute(
-                "UPDATE rs_activity SET status = ? WHERE id = ?",
-                [status, id]
+                "UPDATE rs_activity SET status = ?,description = ? WHERE id = ?",
+                [status, desc, id]
             );
+
+
             return { success: true };
         } catch (error) {
+            await client.execute("ROLLBACK");
             throw error;
         }
     }

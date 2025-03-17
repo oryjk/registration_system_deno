@@ -83,7 +83,7 @@ activityRouter.patch("/:activityId/status", async (ctx) => {
     try {
         log.info("update activity status")
         const activityId = ctx.params.activityId;
-        const { status } = await ctx.request.body().value;
+        const { status, desc } = await ctx.request.body().value;
 
         if (typeof status !== 'number') {
             ctx.response.status = 400;
@@ -91,10 +91,11 @@ activityRouter.patch("/:activityId/status", async (ctx) => {
             return;
         }
 
-        const result = await activityService.updateActivityStatus(activityId, status);
+        const result = await activityService.updateActivityStatusAndDesc(activityId, status, desc);
         log.info("修改比赛状态成功, 比赛ID: " + activityId + ", 状态: " + status)
         ctx.response.body = result;
     } catch (error) {
+        log.error(error.stack)
         ctx.response.status = 500;
         ctx.response.body = { error: error instanceof Error ? error.message : 'An unknown error occurred' };
     }
