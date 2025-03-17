@@ -1,6 +1,7 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import userRouter from "./user/user_handler.ts";
 import activityRouter from "./activity/activity_handler.ts";
+import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 
 const app = new Application();
 const router = new Router({
@@ -17,11 +18,13 @@ router.use(userRouter.routes());
 router.use(activityRouter.routes());
 
 // 注册中间件
+app.use(oakCors({
+    origin: "*",
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    credentials: true
+}));
 // 添加404错误处理中间件
-app.use((ctx, next) => {
-    ctx.response.headers.set('Access-Control-Allow-Origin', '*')
-    return next()
-})
 app.use(async (ctx, next) => {
     try {
         await next();

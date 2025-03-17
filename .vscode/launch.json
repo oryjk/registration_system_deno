@@ -10,9 +10,11 @@
       "runtimeArgs": [
         "run",
         "--inspect-brk",
-        "--allow-all"
+        "--allow-all",
+        "--watch",
+        "server.ts"
       ],
-      "program": "${workspaceFolder}/server.ts",
+      // "program": "${workspaceFolder}/server.ts",
       "attachSimplePort": 9229
     }
   ]

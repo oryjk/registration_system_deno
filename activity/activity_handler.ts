@@ -1,6 +1,7 @@
 import { Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { ActivityService } from "../service/activity_service.ts";
 import log from "../utils/logger.ts";
+import { CreateActivity } from "../types/activity.ts";
 
 const activityRouter = new Router({ prefix: "/activity" });
 const activityService = new ActivityService();
@@ -8,7 +9,25 @@ const activityService = new ActivityService();
 activityRouter.post("/create", async (ctx) => {
     try {
         log.info("create activity")
-        const activityWithInfo = await ctx.request.body().value;
+        const createActivity: CreateActivity = await ctx.request.body().value;
+        const activityWithInfo = {
+            activity: {
+                name: createActivity.name,
+                start_time: new Date(createActivity.startTime),
+                end_time: new Date(createActivity.endTime),
+                cover: createActivity.cover,
+                status: createActivity.status,
+                location: createActivity.location,
+                holding_date: createActivity.holdingDate ? new Date(createActivity.holdingDate) : undefined
+            },
+            info: {
+                color: createActivity.activityInfo.color,
+                opposing: createActivity.activityInfo.opposing,
+                opposing_color: createActivity.activityInfo.opposingColor,
+                players_per_team: createActivity.activityInfo.playersPerTeam,
+                billing_type: createActivity.activityInfo.billingType
+            }
+        };
         const result = await activityService.createActivity(activityWithInfo);
         ctx.response.body = result;
     } catch (error) {
@@ -59,13 +78,65 @@ activityRouter.get("/:activityId", async (ctx) => {
     }
 });
 
+// 修改活动状态
+activityRouter.patch("/:activityId/status", async (ctx) => {
+    try {
+        log.info("update activity status")
+        const activityId = ctx.params.activityId;
+        const { status } = await ctx.request.body().value;
+
+        if (typeof status !== 'number') {
+            ctx.response.status = 400;
+            ctx.response.body = { error: "状态值必须是数字" };
+            return;
+        }
+
+        const result = await activityService.updateActivityStatus(activityId, status);
+        log.info("修改比赛状态成功, 比赛ID: " + activityId + ", 状态: " + status)
+        ctx.response.body = result;
+    } catch (error) {
+        ctx.response.status = 500;
+        ctx.response.body = { error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    }
+});
+
+// 修改用户活动状态
+activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
+    try {
+        log.info("update user activity stand")
+        const { activityId, userId } = ctx.params;
+        const { stand: standInput } = await ctx.request.body().value;
+        let stand: number;
+
+        if (typeof standInput === 'number') {
+            stand = standInput;
+        } else {
+            stand = Number(standInput);
+            if (isNaN(stand)) {
+                ctx.response.status = 400;
+                log.error("状态值必须是有效的数字")
+                ctx.response.body = { error: "状态值必须是有效的数字" };
+                return;
+            }
+        }
+
+        const result = await activityService.updateUserActivityStand(activityId, userId, stand);
+        log.info(`修改用户活动状态成功, 活动ID: ${activityId}, 用户ID: ${userId}, 状态: ${stand}`);
+        ctx.response.body = result;
+    } catch (error) {
+        ctx.response.status = 500;
+        ctx.response.body = { error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    }
+});
+
 // 活动用户列表
 activityRouter.get("/:activityId/users", async (ctx) => {
     try {
         log.info("get activity users")
         const activityId = ctx.params.activityId
-        const userActivities =await activityService.getActivityUsers(activityId)
-        Object.values(
+        const activity = await activityService.getActivityById(activityId)
+        const userActivities = await activityService.getActivityUsers(activityId)
+        const userStands = Object.values(
             userActivities.reduce((acc: Record<string, {
                 user_id: string;
                 activity_id: string;
@@ -87,8 +158,16 @@ activityRouter.get("/:activityId/users", async (ctx) => {
                 return acc
             }, {})
         )
-        console.log(userActivities)
-        ctx.response.body = userActivities;
+        log.info(activity)
+        // 添加用户数量到 activity
+        const activity_info = {
+            ...activity,
+            regist_count: userStands.length
+        };
+        ctx.response.body = {
+            activity: activity_info,
+            user_infos: userStands
+        };
     } catch (error) {
         ctx.response.status = 500;
         error instanceof Error && console.warn(error.stack)
