@@ -1,6 +1,7 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import userRouter from "./user/user_handler.ts";
 import activityRouter from "./activity/activity_handler.ts";
+import wxRouter from "./wx/wx_handler.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 
 const app = new Application();
@@ -16,6 +17,7 @@ router.get("/", (ctx) => {
 //添加子路由
 router.use(userRouter.routes());
 router.use(activityRouter.routes());
+router.use(wxRouter.routes());
 
 // 注册中间件
 app.use(oakCors({
