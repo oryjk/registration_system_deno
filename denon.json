@@ -1,29 +1,29 @@
 {
-    "scripts": {
-        "start": {
-            "cmd": "deno run server.ts",
-            "allow": [
-                "all"
-            ],
-            "watch": true,
-            "env": {
-                "PORT": "8000"
-            }
-        }
-    },
-    "watcher": {
-        "exts": [
-            "js",
-            "jsx",
-            "ts",
-            "tsx",
-            "json"
-        ],
-        "match": [
-            "**/*.*"
-        ],
-        "skip": [
-            "**/logs/**"
-        ]
+  "scripts": {
+    "start": {
+      "cmd": "deno run server.ts",
+      "allow": [
+        "all"
+      ],
+      "watch": true,
+      "env": {
+        "PORT": "8000"
+      }
     }
+  },
+  "watcher": {
+    "exts": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx",
+      "json"
+    ],
+    "match": [
+      "**/*.*"
+    ],
+    "skip": [
+      "**/logs/**"
+    ]
+  }
 }

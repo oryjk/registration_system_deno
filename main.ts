@@ -17,7 +17,6 @@ if (import.meta.main) {
     console.log("定时器");
   }, 1000);
 
-
   // 立即执行的微任务
   queueMicrotask(() => {
     console.log("微任务");
