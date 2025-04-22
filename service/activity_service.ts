@@ -151,12 +151,14 @@ export class ActivityService {
     activityId: string,
     userId: string,
     stand: number,
+    count: number,
   ) {
     const client = await db.client;
+    log.info("更新用户状态| " + userId + " |" + stand + " " + count);
     try {
       await client.execute(
-        "INSERT INTO rs_user_activity (activity_id, user_id, stand, operation_time,paid) VALUES (?, ?, ?, NOW(),?)",
-        [activityId, userId, stand, 1],
+        "INSERT INTO rs_user_activity (activity_id, user_id, stand, operation_time,paid, registration_count) VALUES (?, ?, ?, NOW(),?,?)",
+        [activityId, userId, stand, 1, count],
       );
       return { success: true };
     } catch (error) {

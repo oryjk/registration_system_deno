@@ -131,28 +131,16 @@ activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
   try {
     log.info("update user activity stand");
     const { activityId, userId } = ctx.params;
-    const { stand: standInput } = await ctx.request.body().value;
-    let stand: number;
-
-    if (typeof standInput === "number") {
-      stand = standInput;
-    } else {
-      stand = Number(standInput);
-      if (isNaN(stand)) {
-        ctx.response.status = 400;
-        log.error("状态值必须是有效的数字");
-        ctx.response.body = { error: "状态值必须是有效的数字" };
-        return;
-      }
-    }
+    const { stand, count } = await ctx.request.body().value;
 
     const result = await activityService.updateUserActivityStand(
       activityId,
       userId,
       stand,
+      count,
     );
     log.info(
-      `修改用户活动状态成功, 活动ID: ${activityId}, 用户ID: ${userId}, 状态: ${stand}`,
+      `修改用户活动状态成功, 活动ID: ${activityId}, 用户ID: ${userId}, 状态: ${stand}, 人数: ${count}`,
     );
     ctx.response.body = result;
   } catch (error) {
