@@ -2,7 +2,8 @@ import { Client } from "https://deno.land/x/mysql@v2.12.1/mod.ts";
 
 // 数据库配置
 const config = {
-  hostname: "192.168.3.109",
+  // hostname: "192.168.3.109",
+  hostname: "oryjk.cn",
   port: 3306,
   username: "root",
   password: "beifa888",
