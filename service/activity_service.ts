@@ -80,7 +80,7 @@ export class ActivityService {
     const activityInfos: ActivityInfo[] = await db.query<ActivityInfo[]>(
       "SELECT * FROM rs_activity_info",
     );
-    console.log("查询所有的活动222");
+    log.info("查询所有的活动222");
     const infoMap = activityInfos.reduce(
       (acc: Record<string, ActivityInfo>, item: ActivityInfo) => {
         if (!item.activity_id) {
@@ -110,7 +110,7 @@ export class ActivityService {
       "SELECT * FROM rs_activity where id = ?",
       [id],
     );
-    console.log("查询活动详情" + activity);
+    log.info("查询活动详情" + activity);
     const activityInfo: ActivityInfo[] = await db.query(
       "SELECT * FROM rs_activity_info where activity_id =?",
       [id],
@@ -129,7 +129,7 @@ export class ActivityService {
   }
 
   async updateActivityStatusAndDesc(id: string, status: number, desc: string) {
-    console.log("更新活动状态| " + id + " |" + status + " " + desc);
+    log.info("更新活动状态| " + id + " |" + status + " " + desc);
     const client = await db.client;
     try {
       await client.execute("START TRANSACTION");
@@ -151,12 +151,14 @@ export class ActivityService {
     activityId: string,
     userId: string,
     stand: number,
+    count: number,
   ) {
     const client = await db.client;
+    log.info("更新用户状态| " + userId + " |" + stand + " " + count);
     try {
       await client.execute(
-        "INSERT INTO rs_user_activity (activity_id, user_id, stand, operation_time, paid, registration_count) VALUES (?, ?, ?, CONVERT_TZ(NOW(), @@session.time_zone, '+08:00'),?, ?)",
-        [activityId, userId, stand, 1, 1],
+        "INSERT INTO rs_user_activity (activity_id, user_id, stand, operation_time,paid, registration_count) VALUES (?, ?, ?, NOW(),?,?)",
+        [activityId, userId, stand, 1, count],
       );
       return { success: true };
     } catch (error) {

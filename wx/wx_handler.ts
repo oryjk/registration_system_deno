@@ -8,7 +8,7 @@ const wxService = new WxService();
 // 获取微信 JS 配置
 wxRouter.get("/jsconfig", async (ctx) => {
   try {
-    console.log("get wx jsconfig");
+    log.info("get wx jsconfig");
     const url = ctx.request.url.toString();
     const config = await wxService.getJsConfig(url);
 
@@ -30,7 +30,7 @@ wxRouter.get("/jsconfig", async (ctx) => {
 // 获取微信授权code
 wxRouter.get("/auth", async (ctx) => {
   try {
-    console.log("get wx auth code");
+    log.info("get wx auth code");
     const code = await wxService.getAuthCode();
     ctx.response.body = {
       success: true,
@@ -50,7 +50,7 @@ wxRouter.get("/auth", async (ctx) => {
 // 微信登录
 wxRouter.post("/login", async (ctx) => {
   try {
-    console.log("wx login");
+    log.info("wx login");
     const { code } = await ctx.request.body().value;
     const userInfo = await wxService.login(code);
     ctx.response.body = {
@@ -71,7 +71,7 @@ wxRouter.post("/login", async (ctx) => {
 // 获取用户信息
 wxRouter.get("/user/profile", async (ctx) => {
   try {
-    console.log("get user profile");
+    log.info("get user profile");
     const userProfile = await wxService.getUserProfile();
     ctx.response.body = {
       success: true,
