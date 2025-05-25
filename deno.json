@@ -3,6 +3,15 @@
     "dev": "deno run --watch main.ts"
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1"
+    "@std/assert": "jsr:@std/assert@1",
+    "mysql": "npm:mysql@^2.18.1"
+  },
+  "deploy": {
+    "project": "07e01541-1167-462f-be1a-d08f9a298a01",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
   }
 }

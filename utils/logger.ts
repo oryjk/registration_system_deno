@@ -14,13 +14,13 @@ const colors = {
 };
 
 // 确保日志目录存在
-try {
-  await Deno.mkdir("./logs", { recursive: true });
-} catch (error) {
-  if (!(error instanceof Deno.errors.AlreadyExists)) {
-    throw error;
-  }
-}
+// try {
+//   await Deno.mkdir("./logs", { recursive: true });
+// } catch (error) {
+//   if (!(error instanceof Deno.errors.AlreadyExists)) {
+//     throw error;
+//   }
+// }
 
 // 自定义格式化器
 const formatter = ({ datetime, levelName, msg }: log.LogRecord): string => {
@@ -45,15 +45,16 @@ log.setup({
     console: new log.handlers.ConsoleHandler("INFO", {
       formatter,
     }),
-    file: new log.handlers.FileHandler("INFO", {
-      filename: "./logs/app.log",
-      formatter: "{datetime} {levelName} {msg}",
-    }),
+    // file: new log.handlers.FileHandler("INFO", {
+    //   filename: "./logs/app.log",
+    //   formatter: "{datetime} {levelName} {msg}",
+    // }),
   },
   loggers: {
     default: {
       level: "INFO",
-      handlers: ["console", "file"],
+      // handlers: ["console", "file"],
+      handlers: ["console"],
     },
   },
 });

@@ -8,7 +8,7 @@ const activityService = new ActivityService();
 
 activityRouter.post("/create", async (ctx) => {
   try {
-    log.info("create activity");
+    console.log("create activity");
     const createActivity: CreateActivity = await ctx.request.body().value;
     const activityWithInfo = {
       activity: {
@@ -44,7 +44,7 @@ activityRouter.post("/create", async (ctx) => {
 
 activityRouter.delete("/batch", async (ctx) => {
   try {
-    log.info("batch delete activity");
+    console.log("batch delete activity");
     const { ids } = await ctx.request.body().value;
     if (!Array.isArray(ids) || ids.length === 0) {
       ctx.response.status = 400;
@@ -66,7 +66,7 @@ activityRouter.delete("/batch", async (ctx) => {
 // 活动列表
 activityRouter.get("/infos", async (ctx) => {
   try {
-    log.info("get activity infos");
+    console.log("get activity infos");
     const result = await activityService.getActivities();
     ctx.response.body = result;
   } catch (error) {
@@ -82,7 +82,7 @@ activityRouter.get("/infos", async (ctx) => {
 // 活动详情
 activityRouter.get("/:activityId", async (ctx) => {
   try {
-    log.info("get activity info");
+    console.log("get activity info");
     const result = await activityService.getActivityById(ctx.params.activityId);
     ctx.response.body = result;
   } catch (error) {
@@ -98,7 +98,7 @@ activityRouter.get("/:activityId", async (ctx) => {
 // 修改活动状态
 activityRouter.patch("/:activityId/status", async (ctx) => {
   try {
-    log.info("update activity status");
+    console.log("update activity status");
     const activityId = ctx.params.activityId;
     const { status, desc } = await ctx.request.body().value;
 
@@ -113,7 +113,9 @@ activityRouter.patch("/:activityId/status", async (ctx) => {
       status,
       desc,
     );
-    log.info("修改比赛状态成功, 比赛ID: " + activityId + ", 状态: " + status);
+    console.log(
+      "修改比赛状态成功, 比赛ID: " + activityId + ", 状态: " + status,
+    );
     ctx.response.body = result;
   } catch (error) {
     log.error(error instanceof Error ? error.stack : "Unknown error");
@@ -129,7 +131,7 @@ activityRouter.patch("/:activityId/status", async (ctx) => {
 // 修改用户活动状态
 activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
   try {
-    log.info("update user activity stand");
+    console.log("update user activity stand");
     const { activityId, userId } = ctx.params;
     const { stand: standInput } = await ctx.request.body().value;
     let stand: number;
@@ -151,7 +153,7 @@ activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
       userId,
       stand,
     );
-    log.info(
+    console.log(
       `修改用户活动状态成功, 活动ID: ${activityId}, 用户ID: ${userId}, 状态: ${stand}`,
     );
     ctx.response.body = result;
@@ -202,7 +204,7 @@ activityRouter.get("/:activityId/users", async (ctx) => {
         return acc;
       }, {}),
     );
-    log.info(activity);
+    console.log(activity);
     // 添加用户数量到 activity
     const activity_info = {
       ...activity,
