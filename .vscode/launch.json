@@ -9,7 +9,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
-        "--inspect-brk",
+        "--inspect",
         "--allow-all",
         "--watch",
         "server.ts"

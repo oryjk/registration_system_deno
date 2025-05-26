@@ -5,6 +5,7 @@ import {
   ActivityInfo,
   ActivityWithInfo,
   UserActivity,
+  UserActivityStand,
 } from "../types/activity.ts";
 
 export class ActivityService {
@@ -59,8 +60,7 @@ export class ActivityService {
         ids,
       );
       await client.execute(
-        `DELETE FROM rs_activity_info WHERE activity_id IN (${
-          ids.map(() => "?").join(",")
+        `DELETE FROM rs_activity_info WHERE activity_id IN (${ids.map(() => "?").join(",")
         })`,
         ids,
       );
@@ -127,6 +127,37 @@ export class ActivityService {
       [activityId],
     );
   }
+
+  async getActivityUserStand(activityId: string): Promise<UserActivityStand[]> {
+    const userActivities = await this.getActivityUsers(activityId);
+    const userStands = Object.values(
+      userActivities.reduce((
+        acc: Record<string, UserActivityStand>,
+        item: {
+          user_id: string;
+          activity_id: string;
+          operation_time: string;
+          stand: number;
+          registration_count: number;
+        },
+      ) => {
+        const userId = item.user_id;
+        if (!acc[userId]) {
+          acc[userId] = item;
+        }
+        if (
+          !acc[userId] ||
+          new Date(acc[userId].operation_time) < new Date(item.operation_time)
+        ) {
+          acc[userId] = item;
+        }
+        return acc;
+      }, {}),
+    );
+
+    return userStands
+  }
+
 
   async updateActivityStatusAndDesc(id: string, status: number, desc: string) {
     log.info("更新活动状态| " + id + " |" + status + " " + desc);

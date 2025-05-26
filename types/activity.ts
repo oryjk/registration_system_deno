@@ -3,10 +3,11 @@ export interface Activity {
   cover?: string;
   start_time: Date;
   end_time: Date;
-  holding_date?: Date;
+  holding_date: Date;
   location: string;
   name: string;
   status: number;
+  description: string;
 }
 
 export interface ActivityInfo {
@@ -36,6 +37,14 @@ export interface UserActivity {
   registration_count: number;
 }
 
+export interface UserActivityStand {
+  user_id: string;
+  activity_id: string;
+  operation_time: string;
+  stand: number;
+  registration_count: number;
+}
+
 export interface CreateActivityInfo {
   color: string;
   opposing: string;
@@ -50,6 +59,7 @@ export interface CreateActivity {
   cover?: string;
   status: number;
   location: string;
-  holdingDate?: string;
+  holdingDate: string;
+  description: string;
   activityInfo: CreateActivityInfo;
 }

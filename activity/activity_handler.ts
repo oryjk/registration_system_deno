@@ -18,9 +18,8 @@ activityRouter.post("/create", async (ctx) => {
         cover: createActivity.cover,
         status: createActivity.status,
         location: createActivity.location,
-        holding_date: createActivity.holdingDate
-          ? new Date(createActivity.holdingDate)
-          : undefined,
+        holding_date: new Date(createActivity.holdingDate),
+        description: createActivity.description,
       },
       info: {
         color: createActivity.activityInfo.color,
@@ -68,6 +67,7 @@ activityRouter.get("/infos", async (ctx) => {
   try {
     log.info("get activity infos");
     const result = await activityService.getActivities();
+    result.sort((a, b) => b.holding_date.getTime() - a.holding_date.getTime());
     ctx.response.body = result;
   } catch (error) {
     ctx.response.status = 500;
