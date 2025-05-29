@@ -1,8 +1,8 @@
 import { db } from "../db/mysql.ts";
+import { ActivityService } from "../service/activity_service.ts";
 import { Activity, ActivityOrder, UserActivityStand } from "../types/activity.ts";
 import { UserInfo } from "../types/user.ts";
 import log from "../utils/logger.ts";
-import { ActivityService } from "../service/activity_service.ts";
 
 // 定义返回结果的类型
 interface UserActivityBilling {
@@ -65,11 +65,34 @@ export class UserOrderUseCase {
         const userBilling = (needCalculateUsers).map((user) => {
             if (userStands.has(user.id)) {
                 const userStand = userStands.get(user.id)
-                return {
-                    user_id: userStand!.user_id,
-                    fee: activityOrder.fee,
-                    status: userStand!.stand,
-                };
+                switch (userStand!.stand) {
+                    case 1:
+                        return {
+                            user_id: userStand!.user_id,
+                            fee: activityOrder.fee,
+                            status: userStand!.stand,
+                        };
+                    case 2:
+                        return {
+                            user_id: userStand!.user_id,
+                            fee: 0,
+                            status: userStand!.stand,
+                        };
+                    case 3:
+                        return {
+                            user_id: userStand!.user_id,
+                            fee: 0,
+                            status: userStand!.stand,
+                        };
+                    default:
+                        console.log(`未知的参赛状态：${userStand!.stand}`);
+                        return {
+                            user_id: userStand!.user_id,
+                            fee: 0,
+                            status: 3,
+                        };
+                }
+
             } else {
                 return {
                     user_id: user.id,
