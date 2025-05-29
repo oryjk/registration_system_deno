@@ -4,6 +4,7 @@ import activityRouter from "./activity/activity_handler.ts";
 import wxRouter from "./wx/wx_handler.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import orderRouter from "./order/order_handler.ts";
+import repairRouter from "./activity/activity_repair_handler.ts";
 
 const app = new Application();
 const router = new Router({
@@ -19,6 +20,7 @@ router.get("/", (ctx) => {
 router.use(userRouter.routes());
 router.use(orderRouter.routes());
 router.use(activityRouter.routes());
+router.use(repairRouter.routes());
 router.use(wxRouter.routes());
 
 // 注册中间件

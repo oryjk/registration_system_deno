@@ -1,23 +1,23 @@
 export interface MonthDate {
     month: string;
     count: number;
-    dates: Date[];
+    dates: { date: Date, id: string }[];
 }
 
 
-export const groupByYearMonth = (dates: Date[]): MonthDate[] => {
-    const monthDates = dates.reduce((acc, date) => {
-        const month = date.toLocaleString('default', {
+export const groupByYearMonth = (matchDates: { date: Date, id: string }[]): MonthDate[] => {
+    const monthDates = matchDates.reduce((acc, matchDate) => {
+        const month = matchDate.date.toLocaleString('default', {
             year: 'numeric',
             month: 'long'
         });
         if (!acc[month]) {
             acc[month] = [];
         }
-        acc[month].push(date);
-        acc[month].sort((a, b) => a.getTime() - b.getTime());
+        acc[month].push(matchDate);
+        acc[month].sort((a, b) => a.date.getTime() - b.date.getTime());
         return acc;
-    }, {} as { [key: string]: Date[] });
+    }, {} as { [key: string]: { date: Date, id: string }[] });
 
     const sortedArray = Object.entries(monthDates)
         .sort(([monthA], [monthB]) => {
