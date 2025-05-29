@@ -3,10 +3,11 @@ import log from "../utils/logger.ts";
 import {
   Activity,
   ActivityInfo,
+  ActivityOrder,
   ActivityWithInfo,
-  UserActivity,
   UserActivityStand,
 } from "../types/activity.ts";
+import { UserActivity } from "../types/user.ts";
 
 export class ActivityService {
   async createActivity(activityWithInfo: ActivityWithInfo) {
@@ -18,7 +19,7 @@ export class ActivityService {
 
       const { activity, info } = activityWithInfo;
       await client.execute(
-        "INSERT INTO rs_activity (id, cover, start_time, end_time, holding_date, location, name, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO rs_activity (id, cover, start_time, end_time, holding_date, location, name, status, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           uuid,
           activity.cover,
@@ -28,6 +29,7 @@ export class ActivityService {
           activity.location,
           activity.name,
           activity.status,
+          activity.description,
         ],
       );
 
@@ -80,7 +82,10 @@ export class ActivityService {
     const activityInfos: ActivityInfo[] = await db.query<ActivityInfo[]>(
       "SELECT * FROM rs_activity_info",
     );
-    log.info("查询所有的活动222");
+    const activityOrders: ActivityOrder[] = await db.query<ActivityOrder[]>(
+      "SELECT * FROM rs_activity_order",
+    );
+
     const infoMap = activityInfos.reduce(
       (acc: Record<string, ActivityInfo>, item: ActivityInfo) => {
         if (!item.activity_id) {
@@ -104,6 +109,55 @@ export class ActivityService {
       };
     });
   }
+
+  async getFullActivitiesInfo() {
+    const activities: Activity[] = await db.query<Activity[]>(
+      "SELECT * FROM rs_activity",
+    );
+    const activityInfos: ActivityInfo[] = await db.query<ActivityInfo[]>(
+      "SELECT * FROM rs_activity_info",
+    );
+    const activityOrders: ActivityOrder[] = await db.query<ActivityOrder[]>(
+      "SELECT activity_id,description,fee,total FROM rs_activity_order",
+    );
+
+    const infoMap = activityInfos.reduce(
+      (acc: Record<string, ActivityInfo>, item: ActivityInfo) => {
+        if (!item.activity_id) {
+          log.warning(`发现无效的活动ID: ${JSON.stringify(item)}`);
+          return acc;
+        }
+        acc[item.activity_id] = item;
+        return acc;
+      },
+      {},
+    );
+
+    const orderMap = activityOrders.reduce(
+      (acc: Record<string, ActivityOrder>, item: ActivityOrder) => {
+        if (!item.activity_id) {
+          log.warning(`当前订单未找到活动ID: ${JSON.stringify(item)}`);
+          return acc;
+        }
+        acc[item.activity_id] = item;
+        return acc;
+      },
+      {},
+    );
+
+    return activities.map((activity: Activity) => {
+      if (!activity?.id) {
+        log.warning(`发现无效的活动ID: ${JSON.stringify(activity)}`);
+        return activity; // 如果没有ID，只返回活动基本信息
+      }
+      return {
+        ...activity,
+        ...infoMap[activity.id],
+        ...orderMap[activity.id] || { "activity_id": activity.id, "description": "可能是取消的比赛", "fee": 0, "total": 0 },
+      };
+    });
+  }
+
 
   async getActivityById(id: string) {
     const activity = await db.query<Activity[]>(
@@ -130,11 +184,11 @@ export class ActivityService {
 
   async getActivityUserStand(activityId: string): Promise<UserActivityStand[]> {
     const userActivities = await this.getActivityUsers(activityId);
-    const userStands = Object.values(
+    const userStands = Object.values<UserActivityStand>(
       userActivities.reduce((
-        acc: Record<string, UserActivityStand>,
+        acc: Record<number, UserActivityStand>,
         item: {
-          user_id: string;
+          user_id: number;
           activity_id: string;
           operation_time: string;
           stand: number;
@@ -152,12 +206,11 @@ export class ActivityService {
           acc[userId] = item;
         }
         return acc;
-      }, {}),
+      }, {} as Record<number, UserActivityStand>),
     );
 
-    return userStands
+    return userStands;
   }
-
 
   async updateActivityStatusAndDesc(id: string, status: number, desc: string) {
     log.info("更新活动状态| " + id + " |" + status + " " + desc);

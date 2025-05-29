@@ -1,23 +1,35 @@
 import { Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { db } from "../db/mysql.ts";
-import { UserInfo } from "../types/user.ts";
+import { UserService } from "../service/user_service.ts";
+import log from "../utils/logger.ts";
+
 const userRouter = new Router({
   prefix: "/user",
 });
+const userService = new UserService();
+
+userRouter.post("/login", async (ctx) => {
+  log.info("login");
+  const { code } = await ctx.request.body().value;
+  const result = await userService.login(code);
+  ctx.response.body = result;
+});
+
+userRouter.get("/info/:userId", async (ctx) => {
+  log.info("get user info");
+  const result = await userService.getUserInfo(ctx.params.userId);
+  ctx.response.body = result;
+});
+
+userRouter.get("/activities/:userId", async (ctx) => {
+  log.info("get user activities");
+  const result = await userService.getUserActivities(ctx.params.userId);
+  ctx.response.body = result;
+});
+
 userRouter.get("/infos", async (ctx) => {
-  try {
-    const users: UserInfo[] = await db.query(
-      "SELECT * FROM rs_user_info where status=1",
-    );
-    ctx.response.body = users;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
+  log.info("get all user infos");
+  const result = await userService.getAllUsersInfo();
+  ctx.response.body = result;
 });
 
 export default userRouter;

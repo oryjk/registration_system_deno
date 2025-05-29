@@ -29,16 +29,8 @@ export interface ActivityWithInfo {
   info: ActivityInfo;
 }
 
-export interface UserActivity {
-  user_id: string;
-  activity_id: string;
-  operation_time: string;
-  stand: number;
-  registration_count: number;
-}
-
 export interface UserActivityStand {
-  user_id: string;
+  user_id: number;
   activity_id: string;
   operation_time: string;
   stand: number;
@@ -62,4 +54,13 @@ export interface CreateActivity {
   holdingDate: string;
   description: string;
   activityInfo: CreateActivityInfo;
+}
+
+export interface ActivityOrder {
+  id?: string;
+  activity_id: string;
+  description: string;
+  fee: number;
+  total: number;
+  create_time?: Date;
 }

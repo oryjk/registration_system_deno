@@ -7,7 +7,6 @@ const activityRouter = new Router({ prefix: "/activity" });
 const activityService = new ActivityService();
 
 activityRouter.post("/create", async (ctx) => {
-  try {
     log.info("create activity");
     const createActivity: CreateActivity = await ctx.request.body().value;
     const activityWithInfo = {
@@ -31,18 +30,9 @@ activityRouter.post("/create", async (ctx) => {
     };
     const result = await activityService.createActivity(activityWithInfo);
     ctx.response.body = result;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
 });
 
 activityRouter.delete("/batch", async (ctx) => {
-  try {
     log.info("batch delete activity");
     const { ids } = await ctx.request.body().value;
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -52,52 +42,25 @@ activityRouter.delete("/batch", async (ctx) => {
     }
     const result = await activityService.deleteActivities(ids);
     ctx.response.body = result;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
 });
 
 // 活动列表
 activityRouter.get("/infos", async (ctx) => {
-  try {
     log.info("get activity infos");
-    const result = await activityService.getActivities();
+    const result = await activityService.getFullActivitiesInfo();
     result.sort((a, b) => b.holding_date.getTime() - a.holding_date.getTime());
-    ctx.response.body = result;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
+    ctx.response.body =  { success: true, data: result };
 });
 
 // 活动详情
 activityRouter.get("/:activityId", async (ctx) => {
-  try {
     log.info("get activity info");
     const result = await activityService.getActivityById(ctx.params.activityId);
     ctx.response.body = result;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
 });
 
 // 修改活动状态
 activityRouter.patch("/:activityId/status", async (ctx) => {
-  try {
     log.info("update activity status");
     const activityId = ctx.params.activityId;
     const { status, desc } = await ctx.request.body().value;
@@ -115,20 +78,10 @@ activityRouter.patch("/:activityId/status", async (ctx) => {
     );
     log.info("修改比赛状态成功, 比赛ID: " + activityId + ", 状态: " + status);
     ctx.response.body = result;
-  } catch (error) {
-    log.error(error instanceof Error ? error.stack : "Unknown error");
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
 });
 
 // 修改用户活动状态
 activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
-  try {
     log.info("update user activity stand");
     const { activityId, userId } = ctx.params;
     const { stand, count } = await ctx.request.body().value;
@@ -143,19 +96,10 @@ activityRouter.patch("/:activityId/user/:userId/stand", async (ctx) => {
       `修改用户活动状态成功, 活动ID: ${activityId}, 用户ID: ${userId}, 状态: ${stand}, 人数: ${count}`,
     );
     ctx.response.body = result;
-  } catch (error) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      error: error instanceof Error
-        ? error.message
-        : "An unknown error occurred",
-    };
-  }
 });
 
 // 活动用户列表
 activityRouter.get("/:activityId/users", async (ctx) => {
-  try {
     console.log("%cget activity users", "color: red");
     const activityId = ctx.params.activityId;
     const activity = await activityService.getActivityById(activityId);
@@ -197,16 +141,12 @@ activityRouter.get("/:activityId/users", async (ctx) => {
       regist_count: userStands.length,
     };
     ctx.response.body = {
-      activity: activity_info,
-      user_infos: userStands,
+      success:true,
+      data: {
+        activity_info,
+        user_infos: userStands,
+      },
     };
-  } catch (error) {
-    ctx.response.status = 500;
-    error instanceof Error && console.warn(error.stack);
-    ctx.response.body = {
-      error: error instanceof Error ? error.stack : "An unknown error occurred",
-    };
-  }
 });
 
 export default activityRouter;
