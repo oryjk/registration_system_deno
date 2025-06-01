@@ -27,10 +27,5 @@ Deno.test("async test", async () => {
         return acc;
     }, {} as Record<number, UserInfo>);
     const billing = await userOrderUseCase.calculateAllActivitiesBilling(new Date("2024-01-01"))
-    billing.forEach((value, key) => {
-        console.log(key+"-------------")
-        value.forEach((item) => {
-            console.log(`${userInfoObject[item.user_id].real_name}->${item.fee}`)
-        })
-    })
+    console.log(billing)
 });
